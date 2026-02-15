@@ -27,7 +27,8 @@ func NewGenerator(compose *types.ComposeFile, outputDir string) *Generator {
 
 // Generate creates Quadlet files (.container, .volume, .network)
 func (g *Generator) Generate() error {
-	// Create output directory
+	// Create output directory with standard permissions
+	//nolint:gosec // G301: Standard directory permissions for systemd unit files
 	if err := os.MkdirAll(g.outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}

@@ -91,6 +91,8 @@ func generateKube(compose *types.ComposeFile, outputPath, podName string) error 
 		outputPath = "pod.yaml"
 	}
 
+	// Write output file with readable permissions (0644 is intentional for output files)
+	//nolint:gosec // G306: Output files should be readable by others
 	if err := os.WriteFile(outputPath, []byte(yaml), 0644); err != nil {
 		return fmt.Errorf("failed to write output file: %w", err)
 	}
