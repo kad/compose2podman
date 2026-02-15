@@ -18,39 +18,7 @@ linters:
   disable:
     - gosec  # Disabled due to overly strict file permission checks
     - revive  # Disabled due to false positives on package naming
-  
-  # Linter-specific settings
-  dupl:
-    threshold: 100
-  
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-  
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment
-  
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-        disabled: false
-      - name: package-comments
-        severity: warning
-        disabled: false
-      - name: var-naming
-        disabled: true
 
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-dirs:
-    - third_party
-    - builtin
-    - examples
-  exclude-rules:
-    - linters:
-        - revive
-      text: "(var-naming|avoid meaningless package names)"
