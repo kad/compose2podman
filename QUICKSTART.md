@@ -25,7 +25,7 @@ go install github.com/kad/compose2podman/cmd/compose2podman@latest
 compose2podman
 
 # Or specify file explicitly
-compose2podman -input docker-compose.yaml -type kube -output pod.yaml
+compose2podman --input docker-compose.yaml --type kube --output pod.yaml
 
 # Using short flags
 compose2podman -i docker-compose.yaml -t kube -o pod.yaml -q
@@ -37,7 +37,7 @@ podman play kube pod.yaml
 ### Convert to Quadlet Files
 ```bash
 # Long form
-compose2podman -input docker-compose.yaml -type quadlet -output ./quadlet
+compose2podman --input docker-compose.yaml --type quadlet --output ./quadlet
 
 # Short form
 compose2podman -i docker-compose.yaml -t quadlet -o ./quadlet -q
@@ -93,13 +93,13 @@ volumes:
 
 ```bash
 # Kubernetes format (long form)
-compose2podman -input docker-compose.yaml -type kube -pod-name myapp
+compose2podman --input docker-compose.yaml --type kube --pod-name myapp
 
 # Short form
 compose2podman -i docker-compose.yaml -t kube -p myapp -q
 
 # Quadlet format (long form)
-compose2podman -input docker-compose.yaml -type quadlet -output ./myapp-units
+compose2podman --input docker-compose.yaml --type quadlet --output ./myapp-units
 
 # Short form
 compose2podman -i docker-compose.yaml -t quadlet -o ./myapp-units -q
@@ -114,16 +114,17 @@ sudo systemctl start web.service db.service
 
 | Long Flag | Short | Default | Description |
 |-----------|-------|---------|-------------|
-| `-input` | `-i` | (auto-detect) | Input Compose file |
-| `-type` | `-t` | `kube` | Output type: `kube` or `quadlet` |
-| `-output` | `-o` | `pod.yaml` / `quadlet-output` | Output file or directory |
-| `-pod-name` | `-p` | `compose-pod` | Pod name (Kubernetes only) |
-| `-no-warning` | `-q` | `false` | Suppress proof-of-concept warning |
-| `-version` | `-v` | - | Show version |
+| `--input` | `-i` | (auto-detect) | Input Compose file |
+| `--type` | `-t` | `kube` | Output type: `kube` or `quadlet` |
+| `--output` | `-o` | `pod.yaml` / `quadlet-output` | Output file or directory |
+| `--pod-name` | `-p` | `compose-pod` | Pod name (Kubernetes only) |
+| `--quiet` | `-q` | `false` | Suppress proof-of-concept warning |
+| `--version` | `-v` | - | Show version |
+| `--help` | `-h` | - | Show help message |
 
 ### Auto-Detection
 
-When no `-input` is specified, compose2podman automatically searches for:
+When no `--input` is specified, compose2podman automatically searches for:
 1. `compose.yaml` (preferred)
 2. `compose.yml`
 3. `docker-compose.yaml`

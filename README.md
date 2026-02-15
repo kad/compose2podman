@@ -21,6 +21,7 @@ A CLI tool to convert Docker Compose files to Podman-compatible formats.
 
 - **Kubernetes YAML Generation**: Convert Docker Compose to Kubernetes Pod YAML for `podman play kube`
 - **Quadlet Files Generation**: Convert to Podman Quadlet format for systemd integration
+- **CLI**: Familiar interface with `--flag` syntax and rich help text
 - Support for common Docker Compose features:
   - Services → Containers
   - Networks → Podman networks
@@ -158,19 +159,19 @@ This matches the behavior of `docker compose` and `docker-compose` commands.
 compose2podman
 
 # Specify input file
-compose2podman -input docker-compose.yaml
+compose2podman --input docker-compose.yaml
 compose2podman -i docker-compose.yaml  # Short form
 
 # Generate Kubernetes YAML (default)
-compose2podman -i docker-compose.yaml -type kube -output pod.yaml
+compose2podman -i docker-compose.yaml --type kube --output pod.yaml
 compose2podman -i docker-compose.yaml -t kube -o pod.yaml  # Short form
 
 # Generate Podman Quadlet files
-compose2podman -i docker-compose.yaml -type quadlet -output ./quadlet-files
+compose2podman -i docker-compose.yaml --type quadlet --output ./quadlet-files
 compose2podman -i docker-compose.yaml -t quadlet -o ./quadlet-files  # Short form
 
 # Suppress warning message
-compose2podman -i docker-compose.yaml -no-warning
+compose2podman -i docker-compose.yaml --quiet
 compose2podman -i docker-compose.yaml -q  # Short form
 ```
 
@@ -178,12 +179,13 @@ compose2podman -i docker-compose.yaml -q  # Short form
 
 | Long Flag | Short | Default | Description |
 |-----------|-------|---------|-------------|
-| `-input` | `-i` | (auto-detect) | Path to docker-compose file |
-| `-type` | `-t` | `kube` | Output type: `kube` or `quadlet` |
-| `-output` | `-o` | `pod.yaml` (kube) / `quadlet-output` (quadlet) | Output file or directory |
-| `-pod-name` | `-p` | `compose-pod` | Pod name for Kubernetes output |
-| `-version` | `-v` | - | Show version information |
-| `-no-warning` | `-q` | - | Suppress proof-of-concept warning |
+| `--input` | `-i` | (auto-detect) | Path to docker-compose file |
+| `--type` | `-t` | `kube` | Output type: `kube` or `quadlet` |
+| `--output` | `-o` | `pod.yaml` (kube) / `quadlet-output` (quadlet) | Output file or directory |
+| `--pod-name` | `-p` | `compose-pod` | Pod name for Kubernetes output |
+| `--version` | `-v` | - | Show version information |
+| `--quiet` | `-q` | - | Suppress proof-of-concept warning |
+| `--help` | `-h` | - | Show help message |
 
 ### Auto-Detection of Compose Files
 
