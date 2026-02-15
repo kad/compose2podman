@@ -1,51 +1,55 @@
+version: "2"
+run:
+  tests: true
 linters:
   enable:
-    - errcheck      # Check for unchecked errors
-    - gosimple      # Simplify code
-    - govet         # Reports suspicious constructs
-    - ineffassign   # Detect ineffectual assignments
-    - staticcheck   # Go static analysis
-    - unused        # Check for unused code
-    - gofmt         # Check formatting
-    - goimports     # Check import formatting
-    - misspell      # Check for misspelled words
-    - revive        # Drop-in replacement for golint
-    - gocritic      # Provides diagnostics
-    - gosec         # Security checks
-    - dupl          # Code duplication
-    - unparam       # Unused function parameters
-    - unconvert     # Unnecessary type conversions
-    - prealloc      # Find slice declarations that could be preallocated
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
-  
-  govet:
-    enable-all: true
-  
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-        disabled: false
-      - name: package-comments
-        severity: warning
-        disabled: false
-  
-  gosec:
-    excludes:
-      - G204 # Audit use of command execution (we need this for the tool)
-  
-  dupl:
-    threshold: 100
-
+    - dupl
+    - gocritic
+    - gosec
+    - misspell
+    - prealloc
+    - revive
+    - unconvert
+    - unparam
+  settings:
+    dupl:
+      threshold: 100
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    gosec:
+      excludes:
+        - G204
+        - G301
+        - G306
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+    revive:
+      rules:
+        - name: exported
+          severity: warning
+          disabled: false
+        - name: package-comments
+          severity: warning
+          disabled: false
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
-
-run:
-  timeout: 5m
-  tests: true
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

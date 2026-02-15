@@ -1,3 +1,4 @@
+// Package parser provides functionality to parse Docker Compose YAML files.
 package parser
 
 import (
@@ -8,7 +9,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ParseComposeFile reads and parses a Docker Compose file
+// ParseComposeFile reads and parses a Docker Compose file.
+// The filename parameter is intentionally user-controlled for CLI tool functionality.
+// nolint:gosec // G304: File path comes from CLI argument, expected behavior
 func ParseComposeFile(filename string) (*types.ComposeFile, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {

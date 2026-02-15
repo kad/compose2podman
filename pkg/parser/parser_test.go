@@ -18,13 +18,17 @@ services:
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer func() {
+		if removeErr := os.Remove(tmpfile.Name()); removeErr != nil {
+			t.Logf("Failed to remove temp file: %v", removeErr)
+		}
+	}()
 
-	if _, err := tmpfile.Write(content); err != nil {
-		t.Fatal(err)
+	if _, writeErr := tmpfile.Write(content); writeErr != nil {
+		t.Fatal(writeErr)
 	}
-	if err := tmpfile.Close(); err != nil {
-		t.Fatal(err)
+	if closeErr := tmpfile.Close(); closeErr != nil {
+		t.Fatal(closeErr)
 	}
 
 	// Test parsing
@@ -69,13 +73,17 @@ func TestParseComposeFileInvalidYAML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpfile.Name())
+	defer func() {
+		if removeErr := os.Remove(tmpfile.Name()); removeErr != nil {
+			t.Logf("Failed to remove temp file: %v", removeErr)
+		}
+	}()
 
-	if _, err := tmpfile.Write(content); err != nil {
-		t.Fatal(err)
+	if _, writeErr := tmpfile.Write(content); writeErr != nil {
+		t.Fatal(writeErr)
 	}
-	if err := tmpfile.Close(); err != nil {
-		t.Fatal(err)
+	if closeErr := tmpfile.Close(); closeErr != nil {
+		t.Fatal(closeErr)
 	}
 
 	_, err = ParseComposeFile(tmpfile.Name())

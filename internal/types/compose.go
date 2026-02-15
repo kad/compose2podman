@@ -1,3 +1,5 @@
+// Package types defines data structures for Docker Compose files and provides
+// helper methods for handling flexible field types (maps vs arrays).
 package types
 
 // ComposeFile represents a Docker Compose file structure
@@ -11,21 +13,21 @@ type ComposeFile struct {
 // Service represents a service definition in Docker Compose
 type Service struct {
 	Image         string            `yaml:"image,omitempty"`
-	Build         interface{}       `yaml:"build,omitempty"`
 	ContainerName string            `yaml:"container_name,omitempty"`
+	Restart       string            `yaml:"restart,omitempty"`
+	WorkingDir    string            `yaml:"working_dir,omitempty"`
+	User          string            `yaml:"user,omitempty"`
+	Hostname      string            `yaml:"hostname,omitempty"`
+	Privileged    bool              `yaml:"privileged,omitempty"`
+	Build         interface{}       `yaml:"build,omitempty"`
 	Ports         []string          `yaml:"ports,omitempty"`
 	Environment   interface{}       `yaml:"environment,omitempty"`
 	Volumes       []string          `yaml:"volumes,omitempty"`
 	Networks      interface{}       `yaml:"networks,omitempty"`
 	DependsOn     interface{}       `yaml:"depends_on,omitempty"`
-	Restart       string            `yaml:"restart,omitempty"`
 	Command       interface{}       `yaml:"command,omitempty"`
 	Entrypoint    interface{}       `yaml:"entrypoint,omitempty"`
-	WorkingDir    string            `yaml:"working_dir,omitempty"`
-	User          string            `yaml:"user,omitempty"`
-	Hostname      string            `yaml:"hostname,omitempty"`
 	Labels        map[string]string `yaml:"labels,omitempty"`
-	Privileged    bool              `yaml:"privileged,omitempty"`
 	CapAdd        []string          `yaml:"cap_add,omitempty"`
 	CapDrop       []string          `yaml:"cap_drop,omitempty"`
 }
@@ -33,15 +35,15 @@ type Service struct {
 // Network represents a network definition
 type Network struct {
 	Driver   string            `yaml:"driver,omitempty"`
-	Labels   map[string]string `yaml:"labels,omitempty"`
 	External bool              `yaml:"external,omitempty"`
+	Labels   map[string]string `yaml:"labels,omitempty"`
 }
 
 // Volume represents a volume definition
 type Volume struct {
 	Driver   string            `yaml:"driver,omitempty"`
-	Labels   map[string]string `yaml:"labels,omitempty"`
 	External bool              `yaml:"external,omitempty"`
+	Labels   map[string]string `yaml:"labels,omitempty"`
 }
 
 // EnvironmentMap converts environment interface to map

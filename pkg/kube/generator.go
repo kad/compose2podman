@@ -1,3 +1,5 @@
+// Package kube provides functionality to generate Kubernetes Pod YAML files
+// from Docker Compose definitions.
 package kube
 
 import (
@@ -69,10 +71,10 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 		containerName = service.ContainerName
 	}
 
-	sb.WriteString(fmt.Sprintf("  - name: %s\n", containerName))
+	fmt.Fprintf(sb, "  - name: %s\n", containerName)
 
 	if service.Image != "" {
-		sb.WriteString(fmt.Sprintf("    image: %s\n", service.Image))
+		fmt.Fprintf(sb, "    image: %s\n", service.Image)
 	} else {
 		return fmt.Errorf("service %s: image is required (build not supported)", name)
 	}
@@ -81,7 +83,7 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 	if cmd := service.CommandList(); len(cmd) > 0 {
 		sb.WriteString("    command:\n")
 		for _, c := range cmd {
-			sb.WriteString(fmt.Sprintf("    - %s\n", c))
+			fmt.Fprintf(sb, "    - %s\n", c)
 		}
 	}
 
@@ -89,7 +91,7 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 	if ep := service.EntrypointList(); len(ep) > 0 {
 		sb.WriteString("    args:\n")
 		for _, arg := range ep {
-			sb.WriteString(fmt.Sprintf("    - %s\n", arg))
+			fmt.Fprintf(sb, "    - %s\n", arg)
 		}
 	}
 
@@ -98,8 +100,8 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 	if len(env) > 0 {
 		sb.WriteString("    env:\n")
 		for key, val := range env {
-			sb.WriteString(fmt.Sprintf("    - name: %s\n", key))
-			sb.WriteString(fmt.Sprintf("      value: \"%s\"\n", val))
+			fmt.Fprintf(sb, "    - name: %s\n", key)
+			fmt.Fprintf(sb, "      value: \"%s\"\n", val)
 		}
 	}
 
@@ -108,9 +110,9 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 		sb.WriteString("    ports:\n")
 		for _, port := range service.Ports {
 			containerPort, hostPort := parsePort(port)
-			sb.WriteString(fmt.Sprintf("    - containerPort: %s\n", containerPort))
+			fmt.Fprintf(sb, "    - containerPort: %s\n", containerPort)
 			if hostPort != "" {
-				sb.WriteString(fmt.Sprintf("      hostPort: %s\n", hostPort))
+				fmt.Fprintf(sb, "      hostPort: %s\n", hostPort)
 			}
 		}
 	}
@@ -120,14 +122,14 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 		sb.WriteString("    volumeMounts:\n")
 		for _, vol := range service.Volumes {
 			mountPath, volumeName := parseVolume(vol)
-			sb.WriteString(fmt.Sprintf("    - name: %s\n", volumeName))
-			sb.WriteString(fmt.Sprintf("      mountPath: %s\n", mountPath))
+			fmt.Fprintf(sb, "    - name: %s\n", volumeName)
+			fmt.Fprintf(sb, "      mountPath: %s\n", mountPath)
 		}
 	}
 
 	// Working directory
 	if service.WorkingDir != "" {
-		sb.WriteString(fmt.Sprintf("    workingDir: %s\n", service.WorkingDir))
+		fmt.Fprintf(sb, "    workingDir: %s\n", service.WorkingDir)
 	}
 
 	// Security context
@@ -137,10 +139,10 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 			// Parse user:group format
 			uid, gid := parseUser(service.User)
 			if uid != "" {
-				sb.WriteString(fmt.Sprintf("      runAsUser: %s\n", uid))
+				fmt.Fprintf(sb, "      runAsUser: %s\n", uid)
 			}
 			if gid != "" {
-				sb.WriteString(fmt.Sprintf("      runAsGroup: %s\n", gid))
+				fmt.Fprintf(sb, "      runAsGroup: %s\n", gid)
 			}
 		}
 		if service.Privileged {

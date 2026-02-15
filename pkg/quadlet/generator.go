@@ -1,3 +1,5 @@
+// Package quadlet provides functionality to generate Podman Quadlet unit files
+// from Docker Compose definitions.
 package quadlet
 
 import (
@@ -63,7 +65,7 @@ func (g *Generator) generateContainer(name string, service types.Service) error 
 	// Handle dependencies
 	deps := service.DependsOnList()
 	if len(deps) > 0 {
-		var after []string
+		after := make([]string, 0, len(deps))
 		for _, dep := range deps {
 			after = append(after, fmt.Sprintf("%s.service", dep))
 		}
@@ -164,7 +166,6 @@ func (g *Generator) generateContainer(name string, service types.Service) error 
 	sb.WriteString("\n[Install]\n")
 	sb.WriteString("WantedBy=default.target\n")
 
-	// Write file
 	filename := filepath.Join(g.outputDir, fmt.Sprintf("%s.container", name))
 	if err := os.WriteFile(filename, []byte(sb.String()), 0644); err != nil {
 		return fmt.Errorf("failed to write container file: %w", err)
@@ -193,7 +194,6 @@ func (g *Generator) generateVolume(name string, volume types.Volume) error {
 	sb.WriteString("\n[Install]\n")
 	sb.WriteString("WantedBy=default.target\n")
 
-	// Write file
 	filename := filepath.Join(g.outputDir, fmt.Sprintf("%s.volume", name))
 	if err := os.WriteFile(filename, []byte(sb.String()), 0644); err != nil {
 		return fmt.Errorf("failed to write volume file: %w", err)
@@ -222,7 +222,6 @@ func (g *Generator) generateNetwork(name string, network types.Network) error {
 	sb.WriteString("\n[Install]\n")
 	sb.WriteString("WantedBy=default.target\n")
 
-	// Write file
 	filename := filepath.Join(g.outputDir, fmt.Sprintf("%s.network", name))
 	if err := os.WriteFile(filename, []byte(sb.String()), 0644); err != nil {
 		return fmt.Errorf("failed to write network file: %w", err)
