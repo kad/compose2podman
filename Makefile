@@ -15,8 +15,8 @@ test:
 # Run tests with coverage
 test-coverage:
 	go test -cover ./...
-	go test -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out -o coverage.html
+	go test -coverprofile=coverage.txt ./...
+	go tool cover -html=coverage.txt -o coverage.html
 
 # Run tests with race detector
 test-race:
@@ -27,7 +27,7 @@ clean:
 	rm -f compose2podman
 	rm -f pod.yaml full-pod.yaml test-pod.yaml
 	rm -rf quadlet-output quadlet-test
-	rm -f coverage.out coverage.html
+	rm -f coverage.txt coverage.html
 
 # Install the binary
 install:
