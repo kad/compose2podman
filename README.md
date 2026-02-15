@@ -107,10 +107,98 @@ make snapshot  # Builds for all platforms in dist/
 
 ## Usage
 
+### Basic Usage
+
+```bash
+# Use default compose file (auto-detects compose.yaml, compose.yml, docker-compose.yaml, or docker-compose.yml)
+compose2podman
+
+# Specify input file
+compose2podman -input docker-compose.yaml
+compose2podman -i docker-compose.yaml  # Short form
+
+# Generate Kubernetes YAML (default)
+compose2podman -i docker-compose.yaml -type kube -output pod.yaml
+compose2podman -i docker-compose.yaml -t kube -o pod.yaml  # Short form
+
+# Generate Podman Quadlet files
+compose2podman -i docker-compose.yaml -type quadlet -output ./quadlet-files
+compose2podman -i docker-compose.yaml -t quadlet -o ./quadlet-files  # Short form
+
+# Suppress warning message
+compose2podman -i docker-compose.yaml -no-warning
+compose2podman -i docker-compose.yaml -q  # Short form
+```
+
+### Flags
+
+| Long Flag | Short | Default | Description |
+|-----------|-------|---------|-------------|
+| `-input` | `-i` | (auto-detect) | Path to docker-compose file |
+| `-type` | `-t` | `kube` | Output type: `kube` or `quadlet` |
+| `-output` | `-o` | `pod.yaml` | Output file (kube) or directory (quadlet) |
+| `-pod-name` | `-p` | `compose-pod` | Pod name for Kubernetes output |
+| `-version` | `-v` | - | Show version information |
+| `-no-warning` | `-q` | - | Suppress proof-of-concept warning |
+
+### Auto-Detection of Compose Files
+
+If no input file is specified, `compose2podman` automatically looks for compose files in this order:
+1. `compose.yaml` (preferred by Docker Compose v2)
+2. `compose.yml`
+3. `docker-compose.yaml`
+4. `docker-compose.yml`
+
+This matches the behavior of `docker compose` and `docker-compose` commands.
+
+### Basic Usage
+
+```bash
+# Use default compose file (auto-detects compose.yaml, compose.yml, docker-compose.yaml, or docker-compose.yml)
+compose2podman
+
+# Specify input file
+compose2podman -input docker-compose.yaml
+compose2podman -i docker-compose.yaml  # Short form
+
+# Generate Kubernetes YAML (default)
+compose2podman -i docker-compose.yaml -type kube -output pod.yaml
+compose2podman -i docker-compose.yaml -t kube -o pod.yaml  # Short form
+
+# Generate Podman Quadlet files
+compose2podman -i docker-compose.yaml -type quadlet -output ./quadlet-files
+compose2podman -i docker-compose.yaml -t quadlet -o ./quadlet-files  # Short form
+
+# Suppress warning message
+compose2podman -i docker-compose.yaml -no-warning
+compose2podman -i docker-compose.yaml -q  # Short form
+```
+
+### Flags
+
+| Long Flag | Short | Default | Description |
+|-----------|-------|---------|-------------|
+| `-input` | `-i` | (auto-detect) | Path to docker-compose file |
+| `-type` | `-t` | `kube` | Output type: `kube` or `quadlet` |
+| `-output` | `-o` | `pod.yaml` (kube) / `quadlet-output` (quadlet) | Output file or directory |
+| `-pod-name` | `-p` | `compose-pod` | Pod name for Kubernetes output |
+| `-version` | `-v` | - | Show version information |
+| `-no-warning` | `-q` | - | Suppress proof-of-concept warning |
+
+### Auto-Detection of Compose Files
+
+If no input file is specified, `compose2podman` automatically looks for compose files in this order:
+1. `compose.yaml` (preferred by Docker Compose v2)
+2. `compose.yml`
+3. `docker-compose.yaml`
+4. `docker-compose.yml`
+
+This matches the behavior of `docker compose` and `docker-compose` commands.
+
 ### Generate Kubernetes YAML
 
 ```bash
-compose2podman -input docker-compose.yaml -type kube -output pod.yaml
+compose2podman -i docker-compose.yaml -t kube -o pod.yaml
 ```
 
 Then use with Podman:
@@ -122,7 +210,7 @@ podman play kube pod.yaml
 ### Generate Quadlet Files
 
 ```bash
-compose2podman -input docker-compose.yaml -type quadlet -output ./quadlet-files
+compose2podman -i docker-compose.yaml -t quadlet -o ./quadlet-files
 ```
 
 Then install:
@@ -136,28 +224,6 @@ systemctl --user daemon-reload
 sudo cp quadlet-files/* /etc/containers/systemd/
 sudo systemctl daemon-reload
 ```
-
-### Command Line Options
-
-```
--input string
-    Path to docker-compose.yaml file (default "docker-compose.yaml")
-    
--type string
-    Output type: kube or quadlet (default "kube")
-    
--output string
-    Output file (for kube) or directory (for quadlet)
-    Default: "pod.yaml" for kube, "quadlet-output" for quadlet
-    
--pod-name string
-    Pod name for Kubernetes output (default "compose-pod")
-
--no-warning
-    Suppress the proof-of-concept warning message
-    
--version
-    Show version information
 ```
 
 ## Examples

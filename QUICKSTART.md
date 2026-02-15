@@ -21,13 +21,28 @@ go install github.com/kad/compose2podman/cmd/compose2podman@latest
 
 ### Convert to Kubernetes YAML
 ```bash
+# Auto-detect compose file (looks for compose.yaml, compose.yml, docker-compose.yaml, docker-compose.yml)
+compose2podman
+
+# Or specify file explicitly
 compose2podman -input docker-compose.yaml -type kube -output pod.yaml
+
+# Using short flags
+compose2podman -i docker-compose.yaml -t kube -o pod.yaml -q
+
+# Use with Podman
 podman play kube pod.yaml
 ```
 
 ### Convert to Quadlet Files
 ```bash
+# Long form
 compose2podman -input docker-compose.yaml -type quadlet -output ./quadlet
+
+# Short form
+compose2podman -i docker-compose.yaml -t quadlet -o ./quadlet -q
+
+# Install
 cp quadlet/* ~/.config/containers/systemd/
 systemctl --user daemon-reload
 ```
@@ -46,7 +61,12 @@ services:
 ```
 
 ```bash
-compose2podman -input docker-compose.yaml -type kube
+# Auto-detect compose file in current directory
+compose2podman -q
+podman play kube pod.yaml
+
+# Or specify file
+compose2podman -i docker-compose.yaml -t kube -q
 podman play kube pod.yaml
 ```
 
@@ -72,11 +92,19 @@ volumes:
 ```
 
 ```bash
-# Kubernetes format
+# Kubernetes format (long form)
 compose2podman -input docker-compose.yaml -type kube -pod-name myapp
 
-# Quadlet format  
+# Short form
+compose2podman -i docker-compose.yaml -t kube -p myapp -q
+
+# Quadlet format (long form)
 compose2podman -input docker-compose.yaml -type quadlet -output ./myapp-units
+
+# Short form
+compose2podman -i docker-compose.yaml -t quadlet -o ./myapp-units -q
+
+# Install
 sudo cp myapp-units/* /etc/containers/systemd/
 sudo systemctl daemon-reload
 sudo systemctl start web.service db.service
@@ -84,31 +112,45 @@ sudo systemctl start web.service db.service
 
 ## Command Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `-input` | `docker-compose.yaml` | Input Compose file |
-| `-type` | `kube` | Output type: `kube` or `quadlet` |
-| `-output` | `pod.yaml` / `quadlet-output` | Output file or directory |
-| `-pod-name` | `compose-pod` | Pod name (Kubernetes only) |
-| `-no-warning` | `false` | Suppress proof-of-concept warning |
-| `-version` | - | Show version |
+| Long Flag | Short | Default | Description |
+|-----------|-------|---------|-------------|
+| `-input` | `-i` | (auto-detect) | Input Compose file |
+| `-type` | `-t` | `kube` | Output type: `kube` or `quadlet` |
+| `-output` | `-o` | `pod.yaml` / `quadlet-output` | Output file or directory |
+| `-pod-name` | `-p` | `compose-pod` | Pod name (Kubernetes only) |
+| `-no-warning` | `-q` | `false` | Suppress proof-of-concept warning |
+| `-version` | `-v` | - | Show version |
+
+### Auto-Detection
+
+When no `-input` is specified, compose2podman automatically searches for:
+1. `compose.yaml` (preferred)
+2. `compose.yml`
+3. `docker-compose.yaml`
+4. `docker-compose.yml`
+
+This matches the behavior of `docker compose` command.
 
 ## Common Workflows
 
 ### Development
 ```bash
-# Quick local testing
-compose2podman -input docker-compose.yaml -type kube
+# Quick local testing (auto-detects compose file)
+compose2podman -q
 podman play kube pod.yaml
 
 # Stop
 podman play kube --down pod.yaml
+
+# Or specify file explicitly
+compose2podman -i docker-compose.yaml -t kube -q
+podman play kube pod.yaml
 ```
 
 ### Production (Quadlet)
 ```bash
-# Generate units
-compose2podman -input docker-compose.yaml -type quadlet -output ./units
+# Generate units (short form)
+compose2podman -i docker-compose.yaml -t quadlet -o ./units -q
 
 # Install system services
 sudo cp units/* /etc/containers/systemd/
@@ -124,10 +166,14 @@ sudo systemctl status web.service
 
 ### Testing Changes
 ```bash
-# Rebuild after compose changes
-compose2podman -input docker-compose.yaml -type kube -output pod.yaml
+# Rebuild after compose changes (auto-detect)
+compose2podman -q
 
 # Apply changes
+podman play kube --replace pod.yaml
+
+# Or with explicit file
+compose2podman -i docker-compose.yaml -o pod.yaml -q
 podman play kube --replace pod.yaml
 ```
 
