@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test
+    strategy:
+      matrix:
+        go-version: ['1.24.x', '1.25.x']
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Verify dependencies
+      run: go mod verify
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Run tests
+      run: go test -v -race -coverprofile=coverage.out ./...
+
+    - name: Run go vet
+      run: go vet ./...
+
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.25.x'
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./coverage.out
+        flags: unittests
+        name: codecov-umbrella
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25.x'
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v4
+      with:
+        version: latest
+
+  build:
+    name: Build Artifacts
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.25.x'
+
+    - name: Build for multiple platforms
+      run: |
+        mkdir -p dist
+        GOOS=linux GOARCH=amd64 go build -o dist/compose2podman-linux-amd64 ./cmd/compose2podman
+        GOOS=linux GOARCH=arm64 go build -o dist/compose2podman-linux-arm64 ./cmd/compose2podman
+        GOOS=darwin GOARCH=amd64 go build -o dist/compose2podman-darwin-amd64 ./cmd/compose2podman
+        GOOS=darwin GOARCH=arm64 go build -o dist/compose2podman-darwin-arm64 ./cmd/compose2podman
+        GOOS=windows GOARCH=amd64 go build -o dist/compose2podman-windows-amd64.exe ./cmd/compose2podman
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries
+        path: dist/
