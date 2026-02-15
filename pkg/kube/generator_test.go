@@ -274,3 +274,84 @@ func TestGenerateWithHostPathVolumes(t *testing.T) {
 		t.Error("Expected volume name web-data")
 	}
 }
+
+// TestDetermineHostPathType tests the hostPath type determination logic
+func TestDetermineHostPathType(t *testing.T) {
+	tests := []struct {
+		name     string
+		path     string
+		expected string
+	}{
+		{"Config file", "/etc/nginx/nginx.conf", "FileOrCreate"},
+		{"JSON file", "./config/app.json", "FileOrCreate"},
+		{"YAML file", "/config/settings.yaml", "FileOrCreate"},
+		{"Shell script", "./scripts/startup.sh", "FileOrCreate"},
+		{"Certificate", "/certs/server.pem", "FileOrCreate"},
+		{"Properties file", "./application.properties", "FileOrCreate"},
+		{"Directory", "/var/lib/data", "DirectoryOrCreate"},
+		{"Relative directory", "./html", "DirectoryOrCreate"},
+		{"Directory with trailing slash", "/logs/", "DirectoryOrCreate"},
+		{"Directory with backslash", "C:\\data\\", "DirectoryOrCreate"},
+		{"Ambiguous path", "/opt/myapp", "DirectoryOrCreate"},
+		{"Single name", "data", "DirectoryOrCreate"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := determineHostPathType(tt.path)
+			if result != tt.expected {
+				t.Errorf("determineHostPathType(%q) = %q, want %q", tt.path, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestGenerateWithFileAndDirectoryVolumes tests file vs directory volume generation
+func TestGenerateWithFileAndDirectoryVolumes(t *testing.T) {
+	compose := &types.ComposeFile{
+		Services: map[string]types.Service{
+			"web": {
+				Image: "nginx:latest",
+				Volumes: []string{
+					"/etc/nginx/nginx.conf:/etc/nginx/nginx.conf", // file
+					"./config.json:/app/config.json",              // file
+					"/var/lib/data:/data",                         // directory
+					"./html:/usr/share/nginx/html",                // directory
+					"/logs/:/var/log/nginx/",                      // directory with slash
+				},
+			},
+		},
+	}
+
+	gen := NewGenerator(compose, "test-pod")
+	yaml, err := gen.Generate()
+	if err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Check for FileOrCreate for files
+	if !strings.Contains(yaml, "type: FileOrCreate") {
+		t.Error("Expected FileOrCreate type for file volumes")
+	}
+
+	// Check for DirectoryOrCreate for directories
+	if !strings.Contains(yaml, "type: DirectoryOrCreate") {
+		t.Error("Expected DirectoryOrCreate type for directory volumes")
+	}
+
+	// Verify specific file volume
+	if !strings.Contains(yaml, "/etc/nginx/nginx.conf") {
+		t.Error("Expected nginx.conf file mount")
+	}
+
+	// Count occurrences
+	fileCount := strings.Count(yaml, "type: FileOrCreate")
+	dirCount := strings.Count(yaml, "type: DirectoryOrCreate")
+
+	if fileCount != 2 {
+		t.Errorf("Expected 2 FileOrCreate volumes, got %d", fileCount)
+	}
+	if dirCount != 3 {
+		t.Errorf("Expected 3 DirectoryOrCreate volumes, got %d", dirCount)
+	}
+}

@@ -15,6 +15,7 @@ type volumeInfo struct {
 	name     string
 	hostPath string // empty if it's a named volume
 	isPath   bool   // true if it's a host path (absolute or relative)
+	hostType string // Kubernetes hostPath type: DirectoryOrCreate, FileOrCreate, etc.
 }
 
 // Generator generates Kubernetes YAML for podman play kube
@@ -69,7 +70,7 @@ func (g *Generator) Generate() (string, error) {
 				// Use hostPath for actual paths
 				sb.WriteString("    hostPath:\n")
 				sb.WriteString(fmt.Sprintf("      path: %s\n", volInfo.hostPath))
-				sb.WriteString("      type: DirectoryOrCreate\n")
+				sb.WriteString(fmt.Sprintf("      type: %s\n", volInfo.hostType))
 			} else {
 				// Use PVC for named volumes
 				sb.WriteString("    persistentVolumeClaim:\n")
@@ -146,10 +147,12 @@ func (g *Generator) generateContainer(sb *strings.Builder, name string, service 
 
 			// Track volume for volumes section
 			if _, exists := usedVolumes[volumeName]; !exists {
+				hostType := determineHostPathType(hostPath)
 				usedVolumes[volumeName] = &volumeInfo{
 					name:     volumeName,
 					hostPath: hostPath,
 					isPath:   isPath,
+					hostType: hostType,
 				}
 			}
 		}
@@ -303,6 +306,27 @@ func pathToVolumeName(path string) string {
 	}
 
 	return volumeName
+}
+
+// determineHostPathType determines the appropriate Kubernetes hostPath type based on the path
+func determineHostPathType(path string) string {
+	// Check if path looks like a file (has an extension)
+	ext := filepath.Ext(path)
+
+	// Common file extensions that indicate a file mount
+	if ext != "" {
+		// Files like .conf, .yaml, .json, .xml, .properties, .sh, .py, etc.
+		return "FileOrCreate"
+	}
+
+	// Check if path ends with a slash (explicitly a directory)
+	if strings.HasSuffix(path, "/") || strings.HasSuffix(path, "\\") {
+		return "DirectoryOrCreate"
+	}
+
+	// Default to directory for ambiguous cases
+	// This is safer as directories are more common in volume mounts
+	return "DirectoryOrCreate"
 }
 
 // parseUser parses user:group format
